@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 // destructured constructor calls for courses, authors, loadCourses, loadAuthors, and..
 // ...props assigns any variable that has not be destructured and assign it to a variable called props
 
-const ManageCoursePage = ({
+export const ManageCoursePage = ({
   courses,
   authors,
   loadCourses,
