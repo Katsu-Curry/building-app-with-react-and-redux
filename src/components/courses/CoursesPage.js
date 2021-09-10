@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import CourseList from "./CourseList";
 import * as authorActions from "../../redux/actions/authorActions";
+import * as searchActions from "../../redux/actions/searchActions";
 import { Redirect } from "react-router-dom";
 import Spinner from "../common/Spinner";
 import { toast } from "react-toastify";
@@ -54,6 +55,14 @@ class CoursesPage extends React.Component {
             >
               Add Course
             </button>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search"
+              onChange={(event) => {
+                this.props.actions.setSearch(event.target.value);
+              }}
+            ></input>
             <CourseList
               onDeleteClick={this.handleDeleteCourse}
               courses={this.props.courses}
@@ -74,18 +83,10 @@ CoursesPage.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    courses:
-      state.authors.length === 0
-        ? []
-        : state.courses.map((course) => {
-            return {
-              ...course,
-              authorName: state.authors.find((a) => a.id === course.authorId)
-                .name,
-            };
-          }),
+    courses: filterCourses(state),
     authors: state.authors,
     loading: state.apiCallsInProgress > 0,
+    search: state.search,
   };
 }
 
@@ -95,8 +96,26 @@ function mapDispatchToProps(dispatch) {
       loadCourses: bindActionCreators(courseActions.loadCourses, dispatch),
       loadAuthors: bindActionCreators(authorActions.loadAuthors, dispatch),
       deleteCourse: bindActionCreators(courseActions.deleteCourse, dispatch),
+      setSearch: bindActionCreators(searchActions.setSearch, dispatch),
     },
   };
 }
+
+const filterCourses = (state) => {
+  if (state.authors.length) {
+    const coursesWithAuthors = state.courses.map((course) => {
+      return {
+        ...course,
+        authorName: state.authors.find((a) => a.id === course.authorId).name,
+      };
+    });
+
+    return coursesWithAuthors.filter((course) => {
+      return course.title.toLowerCase().includes(state.search.toLowerCase());
+    });
+  } else {
+    return [];
+  }
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(CoursesPage);
